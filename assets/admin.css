@@ -1,0 +1,48 @@
+.mp-creator-admin {
+    margin-top: 20px;
+}
+
+.mp-creator-form {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+
+.mp-creator-list {
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+
+#mp-creator-messages {
+    margin: 20px 0;
+}
+
+.mp-creator-message {
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.mp-creator-message.success {
+    background: #d1e7dd;
+    border: 1px solid #badbcc;
+    color: #0f5132;
+}
+
+.mp-creator-message.error {
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+    color: #842029;
+}
+
+.button-link-delete {
+    color: #dc3232;
+}
+
+.button-link-delete:hover {
+    color: #a00;
+}
