@@ -25,52 +25,86 @@ class MP_Paps_API
         $this->token_expiration = get_transient('mp_paps_token_expiration');
     }
 
-    public function authenticate()
+    public function authenticate($client_id = null, $client_secret = null)
     {
-        $client_id = get_option('mp_paps_client_id', '');
-        $client_secret = get_option('mp_paps_client_secret', '');
+        // Si pas d'arguments, on prend les options
+        if ($client_id === null) $client_id = get_option('mp_paps_client_id', '');
+        if ($client_secret === null) $client_secret = get_option('mp_paps_client_secret', '');
+
+        $log_prefix = '[PAPS DEBUG] ';
+
+        error_log($log_prefix . '=== DÉBUT AUTHENTIFICATION ===');
+        error_log($log_prefix . 'Client ID: ' . $client_id);
 
         if (empty($client_id) || empty($client_secret)) {
-            return new WP_Error('missing_credentials', 'Les identifiants PAPS ne sont pas configurés.');
+            $msg = 'Identifiants manquants.';
+            error_log($log_prefix . 'ERREUR: ' . $msg);
+            return new WP_Error('missing_credentials', $msg);
         }
 
-        $response = wp_remote_post($this->base_url . '/auth/login', array(
-            'headers' => array('Content-Type' => 'application/json'),
-            'body'    => json_encode(array(
-                'clientId'     => $client_id,
-                'clientSecret' => $client_secret,
-            )),
-            'timeout' => 15,
-            'sslverify' => true,
+        $auth_url = rtrim($this->base_url, '/') . '/auth/login';
+
+        $payload = array(
+            'clientId'     => $client_id,
+            'clientSecret' => $client_secret,
+        );
+
+        $body_json = json_encode($payload);
+        error_log($log_prefix . 'URL: ' . $auth_url);
+        error_log($log_prefix . 'Payload: ' . $body_json);
+
+        // UTILISER cURL DIRECTEMENT AU LIEU DE wp_remote_post
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $auth_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $body_json);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Accept: application/json',
+            'Content-Length: ' . strlen($body_json)
         ));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Temporaire pour test
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
-        if (is_wp_error($response)) {
-            error_log('MP PAPS - Erreur authentification: ' . $response->get_error_message());
-            return $response;
+        $response_body = curl_exec($ch);
+        $response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+
+        error_log($log_prefix . 'cURL Response Code: ' . $response_code);
+        if ($curl_error) {
+            error_log($log_prefix . 'cURL Error: ' . $curl_error);
+        }
+        error_log($log_prefix . 'cURL Response: ' . $response_body);
+
+        curl_close($ch);
+
+        if ($curl_error) {
+            return new WP_Error('curl_error', $curl_error);
         }
 
-        $code = wp_remote_retrieve_response_code($response);
-        $body = json_decode(wp_remote_retrieve_body($response), true);
+        $body = json_decode($response_body, true);
 
-        if ($code !== 200 && $code !== 201) {
-            $msg = isset($body['message']) ? $body['message'] : 'Erreur inconnue';
-            error_log('MP PAPS - Auth échouée (HTTP ' . $code . '): ' . $msg);
+        if ($response_code !== 200 && $response_code !== 201) {
+            $msg = isset($body['message']) ? $body['message'] : (isset($body['error']) ? $body['error'] : 'Erreur HTTP ' . $response_code);
+            error_log($log_prefix . 'ECHEC AUTH: ' . $msg);
             return new WP_Error('auth_failed', $msg);
         }
 
         if (empty($body['data']['token'])) {
-            return new WP_Error('no_token', 'Aucun token reçu de l\'API PAPS.');
+            error_log($log_prefix . 'ERREUR: Aucun token dans la réponse.');
+            return new WP_Error('no_token', 'Aucun token reçu.');
         }
 
         $this->token = $body['data']['token'];
-
         $expiration_date = isset($body['data']['expiration']) ? strtotime($body['data']['expiration']) : (time() + 3600);
         $ttl = max(60, $expiration_date - time() - 60);
 
         set_transient('mp_paps_token', $this->token, $ttl);
         set_transient('mp_paps_token_expiration', $expiration_date, $ttl);
 
-        error_log('MP PAPS - Authentification réussie, token valide jusqu\'à ' . date('Y-m-d H:i:s', $expiration_date));
+        error_log($log_prefix . 'SUCCÈS: Token obtenu.');
         return true;
     }
 
@@ -184,22 +218,107 @@ class MP_Paps_API
 
     public function test_connection()
     {
+        error_log('[PAPS TEST] === DÉBUT TEST CONNEXION ===');
+
         delete_transient('mp_paps_token');
         delete_transient('mp_paps_token_expiration');
         $this->token = null;
 
-        $result = $this->authenticate();
+        $client_id = get_option('mp_paps_client_id', '');
+        $client_secret = get_option('mp_paps_client_secret', '');
 
-        if (is_wp_error($result)) {
+        error_log('[PAPS TEST] Client ID: ' . $client_id);
+        error_log('[PAPS TEST] Client Secret length: ' . strlen($client_secret));
+
+        // TEST DIRECT AVEC cURL (contourne wp_remote_post)
+        $auth_url = 'https://api.papslogistics.com/auth/login';
+
+        $payload = array(
+            'clientId' => $client_id,
+            'clientSecret' => $client_secret
+        );
+
+        $body_json = json_encode($payload);
+
+        error_log('[PAPS TEST] Payload JSON: ' . $body_json);
+
+        // Option 1: cURL
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $auth_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $body_json);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Accept: application/json',
+            'Content-Length: ' . strlen($body_json)
+        ));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+        $response_body = curl_exec($ch);
+        $response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+
+        error_log('[PAPS TEST] cURL Response Code: ' . $response_code);
+        error_log('[PAPS TEST] cURL Error: ' . $curl_error);
+        error_log('[PAPS TEST] cURL Response Body: ' . $response_body);
+
+        curl_close($ch);
+
+        if ($response_code === 200 || $response_code === 201) {
+            error_log('[PAPS TEST] SUCCÈS avec cURL!');
             return array(
-                'success' => false,
-                'message' => $result->get_error_message(),
+                'success' => true,
+                'message' => 'Connexion API PAPS réussie !'
             );
         }
 
+        // Option 2: wp_remote_post avec débogage
+        error_log('[PAPS TEST] Tentative avec wp_remote_post...');
+
+        $args = array(
+            'method'    => 'POST',
+            'headers'   => array(
+                'Content-Type' => 'application/json',
+            ),
+            'body'      => $body_json,
+            'timeout'   => 30,
+            'sslverify' => false,
+        );
+
+        error_log('[PAPS TEST] wp_remote_post args: ' . print_r($args, true));
+
+        $response = wp_remote_post($auth_url, $args);
+
+        if (is_wp_error($response)) {
+            error_log('[PAPS TEST] wp_remote_post WP_Error: ' . $response->get_error_message());
+            return array(
+                'success' => false,
+                'message' => 'Erreur réseau: ' . $response->get_error_message()
+            );
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+
+        error_log('[PAPS TEST] wp_remote_post Response Code: ' . $code);
+        error_log('[PAPS TEST] wp_remote_post Response Body: ' . $body);
+
+        if ($code === 200 || $code === 201) {
+            $data = json_decode($body, true);
+            if (!empty($data['data']['token'])) {
+                return array(
+                    'success' => true,
+                    'message' => 'Connexion API PAPS réussie !'
+                );
+            }
+        }
+
         return array(
-            'success' => true,
-            'message' => 'Connexion à l\'API PAPS réussie ! Token obtenu avec succès.',
+            'success' => false,
+            'message' => 'Échec connexion. Code: ' . $code . ' - ' . $body
         );
     }
 }

@@ -40,28 +40,40 @@ function mp_creator_notifier_boot()
  *  2. Domaine         : OwnershipResolver, Email, OrderHandler
  *  3. WooCommerce     : ProductHandler, BrandHandler
  *  4. Interface       : RestApi, Ajax, Sync, Admin
- *  5. Frontend/Debug  : Shortcodes, Debug
+ *  5. PAPS Logistics  : API, Settings, Checkout, Shipping
+ *  6. Frontend/Debug  : Shortcodes, Debug
  */
 function mp_creator_notifier_load_modules()
 {
     $p = MP_CREATOR_NOTIFIER_PLUGIN_PATH . 'includes/';
 
+    // Infrastructure
     require_once $p . 'class-api-token.php';
     require_once $p . 'class-db.php';
     require_once $p . 'class-webhook.php';
 
+    // Domaine métier
     require_once $p . 'class-ownership-resolver.php';
     require_once $p . 'class-email.php';
     require_once $p . 'class-order-handler.php';
 
+    // Intégration WooCommerce
     require_once $p . 'class-product-handler.php';
     require_once $p . 'class-brand-handler.php';
 
+    // Interface & API
     require_once $p . 'class-rest-api.php';
     require_once $p . 'class-ajax.php';
     require_once $p . 'class-sync.php';
     require_once $p . 'class-admin.php';
 
+    // PAPS Logistics (livraison)
+    require_once $p . 'class-paps-api.php';
+    require_once $p . 'class-paps-settings.php';
+    require_once $p . 'class-paps-checkout.php';
+    require_once $p . 'class-paps-shipping.php';
+
+    // Frontend & Debug
     require_once $p . 'class-shortcodes.php';
     require_once $p . 'class-debug.php';
 }
@@ -106,6 +118,9 @@ class MP_Creator_Notifier_Pro
         MP_Ajax_Handler::get_instance();
         MP_Sync_Service::get_instance();
         MP_Admin::get_instance();
+
+        MP_Paps_API::get_instance();
+        MP_Paps_Settings::get_instance();
     }
 
     // =========================================================
@@ -229,7 +244,8 @@ class MP_Creator_Notifier_Pro
                      total_sales  = total_sales + %f,
                      last_order_date = NOW()
                  WHERE id = %d",
-                $total, $creator->id
+                $total,
+                $creator->id
             ));
         }
     }
@@ -257,7 +273,7 @@ add_shortcode('mp_creator_dashboard', function ($atts) {
     }
 
     ob_start();
-    ?>
+?>
     <div class="mp-creator-dashboard">
         <h2><?php echo esc_html__('Welcome', 'mp-creator-notifier') . ', ' . esc_html($creator->name); ?>!</h2>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:20px 0;">
@@ -275,6 +291,6 @@ add_shortcode('mp_creator_dashboard', function ($atts) {
             </div>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 });

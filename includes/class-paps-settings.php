@@ -22,6 +22,13 @@ class MP_Paps_Settings
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('wp_ajax_mp_test_paps_connection', array($this, 'handle_test_connection'));
         add_action('wp_ajax_mp_calculate_paps_fee_test', array($this, 'handle_fee_test'));
+        add_action('wp_ajax_mp_simple_test', array($this, 'ajax_simple_test'));
+    }
+
+    public function ajax_simple_test()
+    {
+        error_log('[SIMPLE TEST] AJAX function works!');
+        wp_send_json_success(array('message' => 'AJAX fonctionne!'));
     }
 
     public function add_settings_page()
@@ -87,17 +94,24 @@ class MP_Paps_Settings
         $default_length  = get_option('mp_paps_default_length', 10);
 
         $token_valid = (bool) get_transient('mp_paps_token');
-        ?>
+?>
         <div class="wrap">
             <h1>
                 <span style="display:inline-flex;align-items:center;gap:10px;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2271b1" stroke-width="2"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2271b1" stroke-width="2">
+                        <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3" />
+                        <rect x="9" y="11" width="14" height="10" rx="1" />
+                        <circle cx="12" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                    </svg>
                     Paramètres PAPS Logistics
                 </span>
             </h1>
 
             <?php if ($saved): ?>
-                <div class="notice notice-success is-dismissible"><p><strong>✅ Paramètres sauvegardés avec succès.</strong></p></div>
+                <div class="notice notice-success is-dismissible">
+                    <p><strong>✅ Paramètres sauvegardés avec succès.</strong></p>
+                </div>
             <?php endif; ?>
 
             <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-top:20px;">
@@ -109,7 +123,9 @@ class MP_Paps_Settings
 
                         <!-- Activation -->
                         <div class="postbox" style="margin-bottom:20px;">
-                            <div class="postbox-header"><h2 class="hndle">⚙️ Activation</h2></div>
+                            <div class="postbox-header">
+                                <h2 class="hndle">⚙️ Activation</h2>
+                            </div>
                             <div class="inside">
                                 <table class="form-table">
                                     <tr>
@@ -127,10 +143,12 @@ class MP_Paps_Settings
 
                         <!-- Identifiants API -->
                         <div class="postbox" style="margin-bottom:20px;">
-                            <div class="postbox-header"><h2 class="hndle">🔐 Identifiants API PAPS</h2></div>
+                            <div class="postbox-header">
+                                <h2 class="hndle">🔐 Identifiants API PAPS</h2>
+                            </div>
                             <div class="inside">
                                 <p style="color:#666;margin-bottom:16px;">
-                                    Ces identifiants vous sont fournis par PAPS Logistics. Contactez 
+                                    Ces identifiants vous sont fournis par PAPS Logistics. Contactez
                                     <a href="https://www.papslogistics.com" target="_blank">papslogistics.com</a> pour obtenir vos accès API.
                                 </p>
                                 <table class="form-table">
@@ -138,8 +156,8 @@ class MP_Paps_Settings
                                         <th><label for="mp_paps_client_id">Client ID <span style="color:red">*</span></label></th>
                                         <td>
                                             <input type="text" id="mp_paps_client_id" name="mp_paps_client_id"
-                                                   value="<?php echo esc_attr($client_id); ?>"
-                                                   class="regular-text" placeholder="votre_email@example.com" autocomplete="off">
+                                                value="<?php echo esc_attr($client_id); ?>"
+                                                class="regular-text" placeholder="votre_email@example.com" autocomplete="off">
                                             <p class="description">Votre adresse email ou identifiant PAPS</p>
                                         </td>
                                     </tr>
@@ -148,8 +166,8 @@ class MP_Paps_Settings
                                         <td>
                                             <div style="display:flex;gap:8px;align-items:center;">
                                                 <input type="password" id="mp_paps_client_secret" name="mp_paps_client_secret"
-                                                       value="<?php echo esc_attr($client_secret); ?>"
-                                                       class="regular-text" placeholder="••••••••••••" autocomplete="new-password">
+                                                    value="<?php echo esc_attr($client_secret); ?>"
+                                                    class="regular-text" placeholder="••••••••••••" autocomplete="new-password">
                                                 <button type="button" id="toggle-secret" class="button" title="Afficher/Masquer" style="padding:4px 8px;">
                                                     👁
                                                 </button>
@@ -180,15 +198,17 @@ class MP_Paps_Settings
 
                         <!-- Configuration livraison -->
                         <div class="postbox" style="margin-bottom:20px;">
-                            <div class="postbox-header"><h2 class="hndle">🚚 Configuration de la livraison</h2></div>
+                            <div class="postbox-header">
+                                <h2 class="hndle">🚚 Configuration de la livraison</h2>
+                            </div>
                             <div class="inside">
                                 <table class="form-table">
                                     <tr>
                                         <th><label for="mp_paps_default_origin">Adresse d'origine <span style="color:red">*</span></label></th>
                                         <td>
                                             <input type="text" id="mp_paps_default_origin" name="mp_paps_default_origin"
-                                                   value="<?php echo esc_attr($default_origin); ?>"
-                                                   class="large-text" placeholder="ex: Dakar, Sénégal">
+                                                value="<?php echo esc_attr($default_origin); ?>"
+                                                class="large-text" placeholder="ex: Dakar, Sénégal">
                                             <p class="description">L'adresse de votre entrepôt ou point de collecte (utilisée comme point de départ).</p>
                                         </td>
                                     </tr>
@@ -197,7 +217,7 @@ class MP_Paps_Settings
                                         <td>
                                             <select id="mp_paps_delivery_type" name="mp_paps_delivery_type">
                                                 <option value="STANDARD" <?php selected($delivery_type, 'STANDARD'); ?>>Standard</option>
-                                                <option value="EXPRESS"  <?php selected($delivery_type, 'EXPRESS'); ?>>Express</option>
+                                                <option value="EXPRESS" <?php selected($delivery_type, 'EXPRESS'); ?>>Express</option>
                                             </select>
                                             <p class="description">Type de livraison par défaut pour le calcul des frais.</p>
                                         </td>
@@ -208,7 +228,9 @@ class MP_Paps_Settings
 
                         <!-- Dimensions par défaut -->
                         <div class="postbox" style="margin-bottom:20px;">
-                            <div class="postbox-header"><h2 class="hndle">📏 Dimensions de colis par défaut</h2></div>
+                            <div class="postbox-header">
+                                <h2 class="hndle">📏 Dimensions de colis par défaut</h2>
+                            </div>
                             <div class="inside">
                                 <p style="color:#666;margin-bottom:12px;">
                                     Ces valeurs sont utilisées pour les produits qui n'ont pas de dimensions définies dans WooCommerce.
@@ -245,7 +267,9 @@ class MP_Paps_Settings
 
                     <!-- Simulateur de frais -->
                     <div class="postbox" style="margin-bottom:20px;">
-                        <div class="postbox-header"><h2 class="hndle">🧪 Simuler un calcul</h2></div>
+                        <div class="postbox-header">
+                            <h2 class="hndle">🧪 Simuler un calcul</h2>
+                        </div>
                         <div class="inside">
                             <p style="color:#666;font-size:13px;">Testez le calcul des frais de livraison avec des adresses personnalisées.</p>
                             <div style="display:flex;flex-direction:column;gap:10px;">
@@ -280,7 +304,9 @@ class MP_Paps_Settings
 
                     <!-- Aide -->
                     <div class="postbox">
-                        <div class="postbox-header"><h2 class="hndle">ℹ️ Aide & Informations</h2></div>
+                        <div class="postbox-header">
+                            <h2 class="hndle">ℹ️ Aide & Informations</h2>
+                        </div>
                         <div class="inside" style="font-size:13px;">
                             <p><strong>Comment ça fonctionne :</strong></p>
                             <ol style="padding-left:16px;color:#555;line-height:1.8;">
@@ -305,101 +331,104 @@ class MP_Paps_Settings
         </div>
 
         <script>
-        jQuery(document).ready(function($) {
+            jQuery(document).ready(function($) {
 
-            // Afficher/Masquer le secret
-            $('#toggle-secret').on('click', function() {
-                var field = $('#mp_paps_client_secret');
-                field.attr('type', field.attr('type') === 'password' ? 'text' : 'password');
-            });
+                // Afficher/Masquer le secret
+                $('#toggle-secret').on('click', function() {
+                    var field = $('#mp_paps_client_secret');
+                    field.attr('type', field.attr('type') === 'password' ? 'text' : 'password');
+                });
 
-            // Test de connexion
-            $('#btn-test-paps').on('click', function() {
-                var btn = $(this);
-                var result = $('#paps-test-result');
+                // Test de connexion
+                $('#btn-test-paps').on('click', function() {
+                    var btn = $(this);
+                    var result = $('#paps-test-result');
 
-                btn.prop('disabled', true).text('⏳ Test en cours...');
-                result.text('').css('color', '#666');
+                    btn.prop('disabled', true).text('⏳ Test en cours...');
+                    result.text('').css('color', '#666');
 
-                $.ajax({
-                    url: ajaxurl,
-                    type: 'POST',
-                    data: {
-                        action: 'mp_test_paps_connection',
-                        nonce: '<?php echo wp_create_nonce('mp_paps_test'); ?>',
-                        client_id: $('#mp_paps_client_id').val(),
-                        client_secret: $('#mp_paps_client_secret').val(),
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            result.text('✅ ' + response.data.message).css('color', '#155724');
-                        } else {
-                            result.text('❌ ' + response.data.message).css('color', '#721c24');
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'mp_test_paps_connection',
+                            nonce: '<?php echo wp_create_nonce('mp_paps_test'); ?>',
+                            client_id: $('#mp_paps_client_id').val(),
+                            client_secret: $('#mp_paps_client_secret').val(),
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                result.text('✅ ' + response.data.message).css('color', '#155724');
+                            } else {
+                                result.text('❌ ' + response.data.message).css('color', '#721c24');
+                            }
+                        },
+                        error: function() {
+                            result.text('❌ Erreur réseau').css('color', '#721c24');
+                        },
+                        complete: function() {
+                            btn.prop('disabled', false).text('🔌 Tester la connexion');
                         }
-                    },
-                    error: function() {
-                        result.text('❌ Erreur réseau').css('color', '#721c24');
-                    },
-                    complete: function() {
-                        btn.prop('disabled', false).text('🔌 Tester la connexion');
+                    });
+                });
+
+                // Simulateur de frais
+                $('#btn-sim-paps').on('click', function() {
+                    var btn = $(this);
+                    var origin = $('#sim-origin').val().trim();
+                    var destination = $('#sim-destination').val().trim();
+                    var qty = parseInt($('#sim-qty').val()) || 1;
+                    var weight = parseFloat($('#sim-weight').val()) || 1;
+
+                    $('#sim-result, #sim-error').hide();
+
+                    if (!origin || !destination) {
+                        $('#sim-error').text('⚠️ Veuillez renseigner l\'origine et la destination.').show();
+                        return;
                     }
+
+                    btn.prop('disabled', true).text('⏳ Calcul en cours...');
+
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'mp_calculate_paps_fee_test',
+                            nonce: '<?php echo wp_create_nonce('mp_paps_fee_test'); ?>',
+                            origin: origin,
+                            destination: destination,
+                            qty: qty,
+                            weight: weight,
+                            delivery_type: $('#mp_paps_delivery_type').val() || 'STANDARD',
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                var d = response.data;
+                                var html = '<strong style="font-size:18px;">' + d.price_formatted + '</strong><br>';
+                                html += '<small>Taille : ' + d.package_size + ' · Distance : ' + d.distance + ' km</small>';
+                                $('#sim-result').html(html).show();
+                            } else {
+                                $('#sim-error').text('❌ ' + response.data.message).show();
+                            }
+                        },
+                        error: function() {
+                            $('#sim-error').text('❌ Erreur réseau').show();
+                        },
+                        complete: function() {
+                            btn.prop('disabled', false).text('🔢 Calculer les frais');
+                        }
+                    });
                 });
             });
-
-            // Simulateur de frais
-            $('#btn-sim-paps').on('click', function() {
-                var btn = $(this);
-                var origin = $('#sim-origin').val().trim();
-                var destination = $('#sim-destination').val().trim();
-                var qty = parseInt($('#sim-qty').val()) || 1;
-                var weight = parseFloat($('#sim-weight').val()) || 1;
-
-                $('#sim-result, #sim-error').hide();
-
-                if (!origin || !destination) {
-                    $('#sim-error').text('⚠️ Veuillez renseigner l\'origine et la destination.').show();
-                    return;
-                }
-
-                btn.prop('disabled', true).text('⏳ Calcul en cours...');
-
-                $.ajax({
-                    url: ajaxurl,
-                    type: 'POST',
-                    data: {
-                        action: 'mp_calculate_paps_fee_test',
-                        nonce: '<?php echo wp_create_nonce('mp_paps_fee_test'); ?>',
-                        origin: origin,
-                        destination: destination,
-                        qty: qty,
-                        weight: weight,
-                        delivery_type: $('#mp_paps_delivery_type').val() || 'STANDARD',
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            var d = response.data;
-                            var html = '<strong style="font-size:18px;">' + d.price_formatted + '</strong><br>';
-                            html += '<small>Taille : ' + d.package_size + ' · Distance : ' + d.distance + ' km</small>';
-                            $('#sim-result').html(html).show();
-                        } else {
-                            $('#sim-error').text('❌ ' + response.data.message).show();
-                        }
-                    },
-                    error: function() {
-                        $('#sim-error').text('❌ Erreur réseau').show();
-                    },
-                    complete: function() {
-                        btn.prop('disabled', false).text('🔢 Calculer les frais');
-                    }
-                });
-            });
-        });
         </script>
-        <?php
+<?php
     }
 
     public function handle_test_connection()
     {
+
+        file_put_contents(__DIR__ . '/paps-debug.log', "handle_test_connection called at " . date('Y-m-d H:i:s') . "\n", FILE_APPEND);
+
         check_ajax_referer('mp_paps_test', 'nonce');
 
         if (!current_user_can('manage_woocommerce')) {
