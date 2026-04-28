@@ -71,6 +71,7 @@ class MP_Admin
         add_menu_page('MP Creators', 'MP Creators', 'manage_woocommerce', 'mp-creators',         [$this, 'page_creators'],  'dashicons-groups', 56);
         add_submenu_page('mp-creators', 'Settings',          'Settings', 'manage_options', 'mp-creator-settings', [$this, 'page_settings']);
         add_submenu_page('mp-creators', 'Synchronisation',   'Sync',     'manage_options', 'mp-creator-sync',     [$this, 'page_sync']);
+        add_submenu_page('mp-creators', 'PAPS Logistics',    'PAPS',     'manage_woocommerce', 'mp-paps-settings',  [$this, 'page_paps_settings']);
         add_submenu_page('mp-creators', 'Logs',              'Logs',     'manage_options', 'mp-creator-logs',     [$this, 'page_logs']);
         add_submenu_page('mp-creators', 'API Documentation', 'API Docs', 'manage_options', 'mp-creator-api',      [$this, 'page_api_docs']);
     }
@@ -390,6 +391,15 @@ class MP_Admin
             </div>
         </div>
 <?php
+    }
+
+    // =========================================================
+    // PAGE PAPS SETTINGS
+    // =========================================================
+
+    public function page_paps_settings()
+    {
+        MP_Paps_Settings::get_instance()->render_settings_page();
     }
 
     // =========================================================
@@ -721,5 +731,14 @@ class MP_Admin
             });
         });
         </script>";
+    }
+
+    // =========================================================
+    // GESTIONNAIRE AJAX PAPS (délégation à la classe PAPS)
+    // =========================================================
+
+    public function handle_paps_ajax_actions()
+    {
+        // Délégué à MP_Paps_Settings qui gère déjà ses propres actions AJAX
     }
 }

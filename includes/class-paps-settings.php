@@ -18,27 +18,20 @@ class MP_Paps_Settings
 
     private function __construct()
     {
-        add_action('admin_menu', array($this, 'add_settings_page'));
+        // Les hooks admin_menu sont maintenant gérés par MP_Admin pour éviter les conflits
+        // add_action('admin_menu', array($this, 'add_settings_page'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('wp_ajax_mp_test_paps_connection', array($this, 'handle_test_connection'));
         add_action('wp_ajax_mp_calculate_paps_fee_test', array($this, 'handle_fee_test'));
     }
 
-    public function add_settings_page()
-    {
-        add_submenu_page(
-            'woocommerce',
-            'Paramètres PAPS',
-            'PAPS Livraison',
-            'manage_woocommerce',
-            'mp-paps-settings',
-            array($this, 'render_settings_page')
-        );
-    }
+    // Cette méthode est maintenant appelée depuis MP_Admin::page_paps_settings()
+    // public function add_settings_page() supprimée car gérée par MP_Admin
 
     public function enqueue_scripts($hook)
     {
-        if ($hook !== 'woocommerce_page_mp-paps-settings') {
+        // Le hook sera 'mp-creators_page_mp-paps-settings' car la page est dans le menu MP Creators
+        if ($hook !== 'mp-creators_page_mp-paps-settings') {
             return;
         }
     }
