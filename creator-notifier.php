@@ -40,28 +40,40 @@ function mp_creator_notifier_boot()
  *  2. Domaine         : OwnershipResolver, Email, OrderHandler
  *  3. WooCommerce     : ProductHandler, BrandHandler
  *  4. Interface       : RestApi, Ajax, Sync, Admin
- *  5. Frontend/Debug  : Shortcodes, Debug
+ *  5. PAPS Logistics  : API, Settings, Checkout, Shipping
+ *  6. Frontend/Debug  : Shortcodes, Debug
  */
 function mp_creator_notifier_load_modules()
 {
     $p = MP_CREATOR_NOTIFIER_PLUGIN_PATH . 'includes/';
 
+    // Infrastructure
     require_once $p . 'class-api-token.php';
     require_once $p . 'class-db.php';
     require_once $p . 'class-webhook.php';
 
+    // Domaine métier
     require_once $p . 'class-ownership-resolver.php';
     require_once $p . 'class-email.php';
     require_once $p . 'class-order-handler.php';
 
+    // Intégration WooCommerce
     require_once $p . 'class-product-handler.php';
     require_once $p . 'class-brand-handler.php';
 
+    // Interface & API
     require_once $p . 'class-rest-api.php';
     require_once $p . 'class-ajax.php';
     require_once $p . 'class-sync.php';
     require_once $p . 'class-admin.php';
 
+    // PAPS Logistics (livraison)
+    require_once $p . 'class-paps-api.php';
+    require_once $p . 'class-paps-settings.php';
+    require_once $p . 'class-paps-checkout.php';
+    require_once $p . 'class-paps-shipping.php';
+
+    // Frontend & Debug
     require_once $p . 'class-shortcodes.php';
     require_once $p . 'class-debug.php';
 }

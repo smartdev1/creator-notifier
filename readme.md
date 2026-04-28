@@ -1,10 +1,10 @@
 === MP Creator Notifier Pro ===
 Contributors: baanabaana
-Tags: woocommerce, creators, notifications, brands, api, webhook
-Requires at least: 5.8
+Tags: woocommerce, creators, notifications, brands, api, webhook, paps, logistics, multi-vendor, marketplace
+Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.0.1
+Stable tag: 5.3.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -258,56 +258,98 @@ No, you can add unlimited creators. The plugin is optimized for performance even
 
 == Changelog ==
 
-= 2.0.1 - 2025-01-17 =
-* **Fixed:** Product brand assignment with multiple taxonomies
-* **Fixed:** Webhook authentication in Laravel integration
-* **Improved:** Error handling for failed email notifications
-* **Improved:** API rate limiting performance
-* **Added:** Support for WooCommerce 8.5+
+= 5.3.0 - 2025-04-28 =
+* **Major Refactoring:** Architecture modulaire complète (15 classes séparées)
+* **Added:** Intégration PAPS Logistics (API, Settings, Checkout, Shipping)
+* **Added:** Gestion des produits variables WooCommerce
+* **Improved:** Réduction de 93% du fichier principal (4203 → 280 lignes)
+* **Improved:** Ordre de chargement des modules documenté
+* **Improved:** Rétrocompatibilité avec pattern Singleton
+* **Fixed:** Synchronisation bidirectionnelle WordPress ↔ Laravel CRM
+* **Fixed:** Webhooks avec authentification par token SHA-256
 
-= 2.0.0 - 2024-12-15 =
-* **Major Update:** Complete API rewrite (v2)
-* **Added:** Laravel CRM webhook integration
-* **Added:** Bulk operations for products and creators
-* **Added:** Advanced statistics caching
-* **Added:** Retry mechanism for failed notifications
-* **Improved:** Security with SHA-256 token hashing
-* **Improved:** Performance optimization for large stores
-* **Changed:** Minimum PHP version to 7.4
-* **Changed:** Database structure for better scalability
+= 5.2.0 - 2025-03-15 =
+* **Added:** API REST v2 avec endpoints complets
+* **Added:** Dashboard créateur avec shortcode [mp_creator_dashboard]
+* **Added:** Logs de notifications avec statut détaillé
+* **Improved:** Performance avec cache transients (stats, creators)
+* **Fixed:** Résolution de propriété pour produits variables
+
+= 5.1.0 - 2025-02-20 =
+* **Added:** Webhook Laravel CRM avec retry automatique
+* **Added:** Support taxonomie product_brand
+* **Improved:** Templates d'emails personnalisables
+* **Fixed:** Calcul des statistiques pour commandes remboursées
+
+= 5.0.0 - 2025-01-17 =
+* **Major Update:** refonte complète de l'architecture
+* **Added:** Gestion CRUD complète des créateurs
+* **Added:** Notifications automatiques par email
+* **Added:** API tokens sécurisés
+* **Changed:** Structure de base de données optimisée
+
+= 2.0.1 - 2024-12-15 =
+* **Fixed:** Assignation de marque avec plusieurs taxonomies
+* **Fixed:** Authentification webhook dans l'intégration Laravel
+* **Improved:** Gestion des erreurs pour notifications email échouées
+* **Improved:** Performance de la limitation de débit API
+* **Added:** Support WooCommerce 8.5+
+
+= 2.0.0 - 2024-11-01 =
+* **Major Update:** Réécriture complète de l'API (v2)
+* **Added:** Intégration webhook Laravel CRM
+* **Added:** Opérations groupées pour produits et créateurs
+* **Added:** Mise en cache avancée des statistiques
+* **Added:** Mécanisme de retry pour notifications échouées
+* **Improved:** Sécurité avec hachage de token SHA-256
+* **Improved:** Optimisation performance pour grandes boutiques
+* **Changed:** Version PHP minimale à 7.4
+* **Changed:** Structure de base de données pour meilleure scalabilité
 
 = 1.5.2 - 2024-10-01 =
-* Fixed: Compatibility with WooCommerce 8.2
-* Fixed: Email template variable escaping
-* Improved: Admin UI responsiveness
+* Fixed: Compatibilité avec WooCommerce 8.2
+* Fixed: Échappement des variables de template email
+* Improved: Responsive de l'interface admin
 
 = 1.5.1 - 2024-08-15 =
-* Added: Support for product_brand taxonomy
-* Fixed: Creator stats calculation for refunded orders
-* Improved: Database query optimization
+* Added: Support de la taxonomie product_brand
+* Fixed: Calcul des stats créateur pour commandes remboursées
+* Improved: Optimisation des requêtes base de données
 
 = 1.5.0 - 2024-06-20 =
 * Added: REST API v1
-* Added: Custom email templates
-* Added: Creator statistics dashboard
-* Fixed: Multiple creators per brand issue
+* Added: Templates d'email personnalisés
+* Added: Dashboard de statistiques créateur
+* Fixed: Problème de plusieurs créateurs par marque
 
 = 1.0.0 - 2024-03-10 =
-* Initial release
-* Basic creator management
-* Email notifications
-* WooCommerce integration
+* Version initiale
+* Gestion basique des créateurs
+* Notifications email
+* Intégration WooCommerce
 
 == Upgrade Notice ==
 
+= 5.3.0 =
+Mise à jour majeure avec architecture modulaire et intégration PAPS Logistics. Sauvegardez votre base de données avant la mise à jour. Tous les modules sont maintenant chargés automatiquement.
+
+= 5.2.0 =
+Ajout de l'API REST v2 et du dashboard créateur. Améliorations de performance significatives.
+
+= 5.1.0 =
+Intégration des webhooks Laravel CRM avec retry automatique. Compatibilité product_brand améliorée.
+
+= 5.0.0 =
+Refonte complète de l'architecture. Nouvelle gestion des créateurs et notifications. Migration automatique des données.
+
 = 2.0.1 =
-Bug fixes and compatibility improvements. Recommended update for all users.
+Corrections de bugs et améliorations de compatibilité. Mise à jour recommandée pour tous les utilisateurs.
 
 = 2.0.0 =
-Major update with breaking changes. Please backup your database and review the changelog before updating. API token regeneration required.
+Mise à jour majeure avec changements cassants. Veuillez sauvegarder votre base de données et consulter le changelog avant la mise à jour. Régénération du token API requise.
 
 = 1.5.0 =
-Adds REST API support. Existing functionality remains unchanged.
+Ajout du support de l'API REST. Les fonctionnalités existantes restent inchangées.
 
 == API Authentication ==
 
