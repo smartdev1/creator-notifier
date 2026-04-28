@@ -31,34 +31,50 @@ class MP_Paps_API
         $client_secret = get_option('mp_paps_client_secret', '');
 
         if (empty($client_id) || empty($client_secret)) {
+            error_log('MP PAPS - Identifiants manquants: ID="' . substr($client_id, 0, 5) . '...", Secret="' . (empty($client_secret) ? 'VIDE' : 'PRÉSENT') . '"');
             return new WP_Error('missing_credentials', 'Les identifiants PAPS ne sont pas configurés.');
         }
 
-        $response = wp_remote_post($this->base_url . '/auth/login', array(
-            'headers' => array('Content-Type' => 'application/json'),
-            'body'    => json_encode(array(
-                'clientId'     => $client_id,
-                'clientSecret' => $client_secret,
-            )),
+        // URL d'authentification - Vérifiez si c'est /auth/login ou /oauth/token selon la doc PAPS
+        $auth_url = $this->base_url . '/auth/login';
+        
+        $payload = array(
+            'clientId'     => $client_id,
+            'clientSecret' => $client_secret,
+        );
+
+        error_log('MP PAPS - Tentative d\'authentification sur: ' . $auth_url);
+        error_log('MP PAPS - Payload: ' . json_encode($payload));
+
+        $response = wp_remote_post($auth_url, array(
+            'headers' => array(
+                'Content-Type'  => 'application/json',
+                'Accept'        => 'application/json',
+            ),
+            'body'    => json_encode($payload),
             'timeout' => 15,
             'sslverify' => true,
         ));
 
         if (is_wp_error($response)) {
-            error_log('MP PAPS - Erreur authentification: ' . $response->get_error_message());
+            error_log('MP PAPS - Erreur réseau authentification: ' . $response->get_error_message());
             return $response;
         }
 
         $code = wp_remote_retrieve_response_code($response);
-        $body = json_decode(wp_remote_retrieve_body($response), true);
+        $raw_body = wp_remote_retrieve_body($response);
+        $body = json_decode($raw_body, true);
+
+        error_log('MP PAPS - Réponse authentification (HTTP ' . $code . '): ' . $raw_body);
 
         if ($code !== 200 && $code !== 201) {
-            $msg = isset($body['message']) ? $body['message'] : 'Erreur inconnue';
-            error_log('MP PAPS - Auth échouée (HTTP ' . $code . '): ' . $msg);
+            $msg = isset($body['message']) ? $body['message'] : (isset($body['error']) ? $body['error'] : 'Erreur inconnue (HTTP ' . $code . ')');
+            error_log('MP PAPS - Auth échouée: ' . $msg);
             return new WP_Error('auth_failed', $msg);
         }
 
         if (empty($body['data']['token'])) {
+            error_log('MP PAPS - Aucun token dans la réponse: ' . print_r($body, true));
             return new WP_Error('no_token', 'Aucun token reçu de l\'API PAPS.');
         }
 
