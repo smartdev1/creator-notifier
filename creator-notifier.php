@@ -118,6 +118,9 @@ class MP_Creator_Notifier_Pro
         MP_Ajax_Handler::get_instance();
         MP_Sync_Service::get_instance();
         MP_Admin::get_instance();
+
+        MP_Paps_API::get_instance();
+        MP_Paps_Settings::get_instance();
     }
 
     // =========================================================
@@ -241,7 +244,8 @@ class MP_Creator_Notifier_Pro
                      total_sales  = total_sales + %f,
                      last_order_date = NOW()
                  WHERE id = %d",
-                $total, $creator->id
+                $total,
+                $creator->id
             ));
         }
     }
@@ -269,7 +273,7 @@ add_shortcode('mp_creator_dashboard', function ($atts) {
     }
 
     ob_start();
-    ?>
+?>
     <div class="mp-creator-dashboard">
         <h2><?php echo esc_html__('Welcome', 'mp-creator-notifier') . ', ' . esc_html($creator->name); ?>!</h2>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:20px 0;">
@@ -287,6 +291,6 @@ add_shortcode('mp_creator_dashboard', function ($atts) {
             </div>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 });
