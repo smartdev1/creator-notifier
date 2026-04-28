@@ -72,6 +72,7 @@ function mp_creator_notifier_load_modules()
     require_once $p . 'class-paps-settings.php';
     require_once $p . 'class-paps-checkout.php';
     require_once $p . 'class-paps-shipping.php';
+    require_once $p . 'class-paps-shipping-method.php';
 
     // Frontend & Debug
     require_once $p . 'class-shortcodes.php';
@@ -102,13 +103,13 @@ class MP_Creator_Notifier_Pro
 
         add_action('init',       [$this, 'init'], 1);
         add_action('admin_init', [$this, 'on_admin_init']);
-
         // Hooks WooCommerce commandes (webhooks Laravel + stats locales)
         // Les emails créateurs sont dans MP_Order_Handler
         add_action('woocommerce_new_order',            [$this, 'on_new_order'],            10, 2);
         add_action('woocommerce_order_status_changed', [$this, 'on_order_status_changed'], 10, 4);
         add_action('woocommerce_update_order',         [$this, 'on_order_updated'],        10, 1);
         add_action('woocommerce_order_refunded',       [$this, 'on_order_refunded'],       10, 2);
+        add_action('woocommerce_new_order',            [$this, 'on_new_order'],            10, 2);
 
         // Instantier les modules
         MP_Order_Handler::get_instance();
@@ -294,3 +295,12 @@ add_shortcode('mp_creator_dashboard', function ($atts) {
 <?php
     return ob_get_clean();
 });
+
+
+add_action('woocommerce_shipping_init', function () {
+    if (class_exists('MP_Paps_Shipping_Method')) {
+        error_log('[DEBUG] Classe MP_Paps_Shipping_Method OK après shipping_init.');
+    } else {
+        error_log('[DEBUG] Classe toujours absente après shipping_init.');
+    }
+}); 
